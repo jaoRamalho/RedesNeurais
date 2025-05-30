@@ -7,7 +7,7 @@
 #include <random>
 #include <iostream>
 #include <algorithm>
-
+#include "Function.hpp"
 
 class Neuron {
 private:
@@ -16,9 +16,10 @@ private:
     double bias;
     double output;
     double delta;
+    ActivationFunction activationFunction;
 
 public:
-    Neuron(int numInputs=0) {
+    Neuron(int numInputs = 0, ActivationFunction a = ActivationFunction::Sigmoid) : activationFunction(a) {
         // Initialize weights and bias with random values
         std::random_device rd;
         std::mt19937 gen(rd());
@@ -33,7 +34,7 @@ public:
         delta = 0.0; // Initialize delta to zero
     }
 
-    Neuron() {
+    Neuron() : activationFunction(ActivationFunction::Sigmoid) {
         // Default constructor initializes with no inputs
         weights = {};
         bias = 0.0;
@@ -54,6 +55,10 @@ public:
             output += inputs[i] * weights[i]; // Weighted sum
         }
         return output; // Return the raw output (before activation)
+    }
+
+    ActivationFunction getActivationFunction() const {
+        return activationFunction;
     }
 
     double getOutput() const {

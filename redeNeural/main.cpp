@@ -39,7 +39,7 @@ int main() {
         return 1;
     }
 
-    std::vector<std::vector<double>> inputs;
+    std::vector<std::vector<double>> allInputs;
     std::vector<std::vector<double>> outputs;
 
     std::string line;
@@ -57,20 +57,31 @@ int main() {
         std::vector<double> inputRow(row.begin() + 1, row.end() - 1); // Ignorar o índice e última coluna
         std::vector<double> outputRow(1, row.back());                 // Última coluna como saída
 
-        inputs.push_back(inputRow);
+        allInputs.push_back(inputRow);
         outputs.push_back(outputRow);
     }
 
     file.close();
 
     // Normalizar os dados de entrada
-    inputs = normalizeData(inputs);
+    allInputs = normalizeData(allInputs);
 
-    NeuralNetwork nn{{6, 8, 4}}; // Definindo a arquitetura da rede neural
-    nn.train(inputs, outputs); // Treinar a rede neural com os dados normalizados
+    //treino recebe metade dos inputs
+    std::vector<std::vector<double>> trainingInputs(allInputs.begin(), allInputs.begin() + allInputs.size() / 2);
+    std::vector<std::vector<double>> classificationInputs(allInputs.begin() + allInputs.size() / 2, allInputs.end());
+
+    NeuralNetwork nn{
+        {6, 8, 4}, 
+        {ActivationFunction::Tanh, ActivationFunction::Sigmoid, ActivationFunction::Softmax}
+    }; // Definindo a arquitetura da rede neural
+
+    std::vector<std::vector<double>> outputsTraning(outputs.begin(), outputs.begin() + outputs.size() / 2);
+    std::vector<std::vector<double>> outputsClassification(outputs.begin() + outputs.size() / 2, outputs.end());
+    nn.trainClassification(trainingInputs, outputsTraning); // Treinar a rede neural com os dados normalizados
  
     std::cout << "Treinamento concluído!" << std::endl;
 
+    // Testar a rede neural com os dados de classificaçãonn
 
-    return 0;
+    std::vector<double> predictions = nn.predict(classificationInputs, outputsClassification);
 }

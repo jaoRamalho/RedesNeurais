@@ -1,12 +1,12 @@
 # Makefile for Neural Network project
 
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -I.
+CXXFLAGS = -std=c++17 -Wall -I.
 
-SRC = main.cpp
-OBJ = main.o
+SRC = main.cpp NeuralNetwork.cpp
+OBJ = main.o NeuralNetwork.o
 
-all: neural_network
+all: clean neural_network
 
 neural_network: $(OBJ)
 	$(CXX) $(CXXFLAGS) -o neural_network $(OBJ)

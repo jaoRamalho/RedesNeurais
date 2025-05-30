@@ -6,23 +6,47 @@
 #include <algorithm>
 #include <vector>
 
-double sigmoid(double x) {
+
+enum class ActivationFunction {
+    Sigmoid,
+    Tanh,
+    Softmax,
+    ReLU,
+    derivativeSigmoid,
+    derivativeTanh,
+    derivativeReLU,
+    none
+};
+
+
+inline double crossEntropy(const std::vector<double>& expected, const std::vector<double>& actual) {
+    double loss = 0.0;
+    for (size_t i = 0; i < expected.size(); ++i) {
+        if (expected[i] > 0) { // Avoid log(0)
+            loss -= expected[i] * std::log(actual[i]);
+        }
+    }
+    return loss; // Cross-entropy loss
+}
+
+
+inline double sigmoid(double x) {
     return 1.0 / (1.0 + std::exp(-x)); // Sigmoid activation function
 }
 
-double sigmoidDerivative(double x) {
+inline double sigmoidDerivative(double x) {
     return std::exp(-x) / std::pow(1.0 + std::exp(-x), 2); // Derivative of sigmoid
 }
 
-double customTanh(double x) {
+inline double customTanh(double x) {
     return std::tanh(x); // Hyperbolic tangent activation function
 }
 
-double customTanhDerivative(double x) {
+inline double customTanhDerivative(double x) {
     return 1.0 - std::pow(std::tanh(x), 2); // Derivative of tanh
 }
 
-std::vector<double> softmax(const std::vector<double>& inputs) {
+inline std::vector<double> softmax(const std::vector<double>& inputs) {
     double maxInput = *std::max_element(inputs.begin(), inputs.end());
     double sumExp = 0.0;
 
@@ -38,11 +62,11 @@ std::vector<double> softmax(const std::vector<double>& inputs) {
     return probabilities;
 }
 
-double relu(double x) {
+inline double relu(double x) {
     return std::max(0.0, x); // ReLU activation function
 }
 
-double reluDerivative(double x) {
+inline double reluDerivative(double x) {
     return (x > 0) ? 1.0 : 0.0; // Derivative of ReLU
 }
 

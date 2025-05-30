@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Ler o arquivo CSV
-file_path = 'data/results_(-6-8-4)_1500.000000_0.001500.csv'  # Substitua pelo caminho do seu arquivo CSV
+file_path = 'redeNeural/data/training/stats_(-6-8-4)_(-1-0-2)_400_880.csv'  # Substitua pelo caminho do seu arquivo CSV
 data = pd.read_csv(file_path, on_bad_lines='skip')
 
 # Plotar os dados
