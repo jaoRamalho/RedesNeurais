@@ -54,7 +54,7 @@ int main() {
         }
 
         // Separar entradas e saídas
-        std::vector<double> inputRow(row.begin() + 1, row.end() - 1); // Ignorar o índice e última coluna
+        std::vector<double> inputRow(row.begin() + 1, row.end() - 2); // Ignorar o índice e última coluna
         std::vector<double> outputRow(1, row.back());                 // Última coluna como saída
 
         allInputs.push_back(inputRow);
@@ -63,25 +63,58 @@ int main() {
 
     file.close();
 
+    //contando a ocorrencia de cada classe
+    std::vector<int> classCounts(4, 0); // Para classes 1-4
+    for (const auto& output : outputs) {
+        int label = static_cast<int>(output[0]);
+        if (label >= 1 && label <= 4) {
+            classCounts[label - 1]++;
+        }
+    }
+    // Exibir a contagem de cada classe
+    std::cout << "Contagem de classes:" << std::endl;
+    for (size_t i = 0; i < classCounts.size(); ++i) {
+        std::cout << "Classe " << (i + 1) << ": " << classCounts[i] << " ocorrências" << std::endl;
+    }
+    // Porcentagem de cada classe
+    std::cout << "Porcentagem de classes:" << std::endl;
+    for (size_t i = 0; i < classCounts.size(); ++i) {
+        double percentage = (static_cast<double>(classCounts[i]) / outputs.size()) * 100.0;
+        std::cout << "Classe " << (i + 1) << ": " << percentage << "%" << std::endl;
+    }
+
     // Normalizar os dados de entrada
     allInputs = normalizeData(allInputs);
+
+    
+    // MELHORES RESULTADOS ATINGIDOS
+    // FUNCOES -> TOPOLOGIA -> TAXA DE APRENDIZADO
+    //(3, 1, 2) -> (8, 16, 4) -> 0.01
+    //(3,7,2) -> (8, 16, 4) -> 0.005
+    //(0, 7, 2) -> (16, 8, 4) -> 0.015
+    //(3, 7, 2) -> (16, 8, 4) -> 0.012
+
 
     //treino recebe metade dos inputs
     std::vector<std::vector<double>> trainingInputs(allInputs.begin(), allInputs.begin() + allInputs.size() / 2);
     std::vector<std::vector<double>> classificationInputs(allInputs.begin() + allInputs.size() / 2, allInputs.end());
-
-    NeuralNetwork nn{
-        {6, 8, 4}, 
-        {ActivationFunction::Tanh, ActivationFunction::Sigmoid, ActivationFunction::Softmax}
-    }; // Definindo a arquitetura da rede neural
-
+    
     std::vector<std::vector<double>> outputsTraning(outputs.begin(), outputs.begin() + outputs.size() / 2);
     std::vector<std::vector<double>> outputsClassification(outputs.begin() + outputs.size() / 2, outputs.end());
+    
+
+  
+    NeuralNetwork nn{
+        {3, 4,4}, 
+        {ActivationFunction::Tanh, ActivationFunction::none, ActivationFunction::Softmax},
+        5
+    }; // Definindo a arquitetura da rede neural
+
     nn.trainClassification(trainingInputs, outputsTraning); // Treinar a rede neural com os dados normalizados
  
     std::cout << "Treinamento concluído!" << std::endl;
 
     // Testar a rede neural com os dados de classificaçãonn
 
-    std::vector<double> predictions = nn.predict(classificationInputs, outputsClassification);
+    std::vector<double> predictions = nn.predict(allInputs, outputs);
 }

@@ -4,7 +4,16 @@
 #include <sstream>  
 
 
-NeuralNetwork::NeuralNetwork(std::vector<int> hiddenLayerSizes, std::vector<ActivationFunction> activationFunctions) {
+std::vector<std::vector<int>> MATRIZ_CONFUSAO = {
+    {0, 0, 0, 0}, // Classe 1
+    {0, 0, 0, 0}, // Classe 2
+    {0, 0, 0, 0}, // Classe 3
+    {0, 0, 0, 0}  // Classe 4
+};
+
+double LEARNING_RATE = 0.02; // Global learning rate for weight updates
+
+NeuralNetwork::NeuralNetwork(std::vector<int> hiddenLayerSizes, std::vector<ActivationFunction> activationFunctions, int numInputs) {
     if (hiddenLayerSizes.empty()) {
         throw std::invalid_argument("Hidden layer sizes must not be empty.");
     }
@@ -12,9 +21,8 @@ NeuralNetwork::NeuralNetwork(std::vector<int> hiddenLayerSizes, std::vector<Acti
     for (size_t i = 0; i < hiddenLayerSizes.size(); ++i) {
         std::vector<Neuron> layer;
 
-        int numInputs = (i == 0) ? hiddenLayerSizes[i] : hiddenLayerSizes[i - 1];
         for (int j = 0; j < hiddenLayerSizes[i]; ++j) {
-            layer.push_back(Neuron(numInputs, activationFunctions[i]));
+            layer.push_back(Neuron((i == 0)? numInputs : hiddenLayerSizes[i - 1], activationFunctions[i]));
         }
         layers.push_back(layer);
         std::cout << "Creating layer " << i + 1 << " with " << hiddenLayerSizes[i] << " neurons." << std::endl;
@@ -117,18 +125,21 @@ std::pair<double, std::vector<int>> NeuralNetwork::calculate_MSE_MC(const std::v
         int predictedClass = std::distance(actualOutputs[i].begin(), std::max_element(actualOutputs[i].begin(), actualOutputs[i].end()));
 
         confusionMatrix[expectedClass][predictedClass]++;
+        MATRIZ_CONFUSAO [expectedClass][predictedClass]++;
     }
+
 
     mse /= (expectedOutputs.size() * numClasses);
 
     return {mse, extract_confusion_stats(confusionMatrix)};
 }
 
-void NeuralNetwork::backPropagate(const std::vector<double>& expectedOutputs) {
+void NeuralNetwork::backPropagate(const std::vector<double>& expectedOutputs,  double posExpected) {
     if (layers.empty()) {
         throw std::invalid_argument("Neural network has no layers.");
     }
 
+    std::vector<double> weigthsClass = {6.15, 2, 3.84, 50}; // Weights for the softmax layer
 
     int sub = (layers.back()[0].getActivationFunction() == ActivationFunction::Softmax) ? 2 : 1;
 
@@ -138,7 +149,7 @@ void NeuralNetwork::backPropagate(const std::vector<double>& expectedOutputs) {
             double output = neuron.getOutput();
             double error = expectedOutputs[i] - output;
             // For softmax, we use the raw output as the delta
-            double delta = error;
+            double delta = error * ((posExpected == i) ? 1.0 : weigthsClass[i]);
             neuron.setDelta(delta);
         }
     }
@@ -161,9 +172,12 @@ void NeuralNetwork::backPropagate(const std::vector<double>& expectedOutputs) {
         for (size_t i = 0; i < layer.size(); ++i) {
             Neuron& neuron = layer[i];
             std::vector<double>& weights = neuron.getWeights();
+            // Atualização de peso com descida de gradiente e L2 regularização
             for (size_t k = 0; k < weights.size(); ++k) {
-                weights[k] += LEARNING_RATE * neuron.getDelta() * neuron.getInputs()[k];
+                double grad = neuron.getDelta() * neuron.getInputs()[k];
+                weights[k] += LEARNING_RATE * grad;
             }
+            // Atualização de bias
             double newBias = neuron.getBias() + LEARNING_RATE * neuron.getDelta();
             neuron.setBias(newBias);
         }
@@ -253,6 +267,17 @@ void NeuralNetwork::trainClassification(const std::vector<std::vector<double>>& 
 
             std::vector<double> actualOutput = feedForward(inputs);
 
+            // //exibe exepected e actual
+            // std::cout << "Expected: ";
+            // for (const auto& val : expectedOutputCompare) {
+            //     std::cout << val << " ";
+            // }
+            // std::cout << "\nActual: ";
+            // for (const auto& val : actualOutput) {
+            //     std::cout << val << " ";
+            // }
+            // std::cout << std::endl;
+
             std::pair<double, std::vector<int>> result = calculate_MSE_MC({expectedOutputCompare}, {actualOutput});
             double mse = result.first;
             std::vector<int> confusionStats = result.second;
@@ -263,7 +288,7 @@ void NeuralNetwork::trainClassification(const std::vector<std::vector<double>>& 
             totalFP += confusionStats[2];
             totalFN += confusionStats[3];
 
-            backPropagate(expectedOutputCompare);
+            backPropagate(expectedOutputCompare, expectedOutput[0] - 1);
         }
         totalMSE /= trainingData.size();
         double totalRMSE = std::sqrt(totalMSE);
@@ -359,7 +384,7 @@ double NeuralNetwork::returnDerivateActivationFunction(ActivationFunction activa
     case ActivationFunction::derivativeReLU:
         return reluDerivative(input);
     case ActivationFunction::none:
-        return 1.0; // Derivative of a constant function is 1
+        return 1.0; // 
     default:
         throw std::invalid_argument("Unknown activation function"); 
     }

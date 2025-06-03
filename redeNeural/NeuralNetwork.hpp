@@ -8,15 +8,16 @@
 #include <string>
 #include <unordered_map>
 
-const double LEARNING_RATE = 0.004; // Learning rate for weight updates
-const double EPOCHS = 880; // Number of training epochs
+extern double LEARNING_RATE; // Learning rate for weight updates
+const double EPOCHS = 10000; // Number of training epochs
+extern std::vector<std::vector<int>> MATRIZ_CONFUSAO;
 
 class NeuralNetwork {
 private:
     std::vector<std::vector<Neuron>> layers; // Layers of neurons
 
 public:
-    NeuralNetwork(std::vector<int> hiddenLayerSizes, std::vector<ActivationFunction> activationFunctions);
+    NeuralNetwork(std::vector<int> hiddenLayerSizes, std::vector<ActivationFunction> activationFunctions, int numInputs);
 
     std::vector<double> feedForward(const std::vector<double>& inputs);
 
@@ -24,9 +25,11 @@ public:
 
     std::pair<double, std::vector<int>> calculate_MSE_MC(const std::vector<std::vector<double>>& expectedOutputs, const std::vector<std::vector<double>>& actualOutputs);
 
-    void backPropagate(const std::vector<double>& expectedOutputs);
+    void backPropagate(const std::vector<double>& expectedOutputs, double posExpected);
 
-    void trainClassification(const std::vector<std::vector<double>>& trainingData, const std::vector<std::vector<double>>& expectedOutputs);
+    void trainClassification(const std::vector<std::vector<double>>& trainingData,
+                             const std::vector<std::vector<double>>& expectedOutputs);
+
     void trainRegression(const std::vector<std::vector<double>>& trainingData, const std::vector<double>& expectedOutputs);
     
     std::vector<double> predict(const std::vector<std::vector<double>>& inputs, std::vector<std::vector<double>>& expectedOutputs);

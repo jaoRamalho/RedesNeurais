@@ -22,14 +22,17 @@ public:
     Neuron(int numInputs = 0, ActivationFunction a = ActivationFunction::Sigmoid) : activationFunction(a) {
         // Initialize weights and bias with random values
         std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<> dis(-1.0, 1.0);
+        std::mt19937 gen(42);
+        std::uniform_real_distribution<> dis(-1, 1);
 
         weights.resize(numInputs);
+        // Xavier initialization
+        double limit = (numInputs > 0) ? std::sqrt(6.0 / numInputs) : 1.0;
+        std::uniform_real_distribution<> xavierDist(-limit, limit);
         for (double& weight : weights) {
-            weight = dis(gen); // Random weight initialization
+            weight = xavierDist(gen);
         }
-        bias = dis(gen); // Random bias initialization
+        bias = xavierDist(gen); // Xavier bias initialization
         output = 0.0;
         delta = 0.0; // Initialize delta to zero
     }

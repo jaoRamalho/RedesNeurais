@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Ler o arquivo CSV
-file_path = 'redeNeural/data/training/stats_(-6-8-4)_(-1-0-2)_400_880.csv'  # Substitua pelo caminho do seu arquivo CSV
+file_path = 'data/training/stats_(-8-16-4)_(-1-7-2)_5000_1000.csv'  # Substitua pelo caminho do seu arquivo CSV
 data = pd.read_csv(file_path, on_bad_lines='skip')
 
 # Plotar os dados
@@ -45,6 +45,8 @@ plt.ylabel('F1Score')
 plt.title('F1Score por Epoch')
 plt.legend()
 plt.grid()
+
+plt.suptitle('Grafico de chegada a um min local, (tanh, none, softmax) - (8, 16, 4) - 0.05', fontsize=16)
 
 # Ajustar layout e mostrar os gráficos
 plt.tight_layout()
