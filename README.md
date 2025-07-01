@@ -1,6 +1,6 @@
 # Projeto de Sistemas inteligentes 
 
-Rede Neural básica desenvolvida em C++, aplica os conceitos de ajustes de peso pelo padrão Feedford e Backpropagation.
+Implementação em C++ de uma rede neural do tipo feedforward com algoritmo de backpropagation, desenvolvida para a classificação de dados relacionados a instabilidades em pacientes hospitalares.
 
 Este projeto foi desenvolvido como parte da disciplina **Sistemas Inteligentes** (UTFPR - 2023/1) e tem como objetivo aplicar técnicas de aprendizado de máquina.
 
